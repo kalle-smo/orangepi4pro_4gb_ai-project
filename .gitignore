@@ -1,0 +1,71 @@
+# ==========================================
+# Orange Pi 4 Pro AI Project - Git Ignore
+# ==========================================
+
+# --- Системные образы (слишком большие для GitHub!) ---
+*.img
+*.img.gz
+*.img.xz
+*.bin
+*.dd
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+ENV/
+env/
+.venv
+
+# --- Ollama модели (не загружаем!) ---
+.ollama/
+models/
+
+# --- Логи и временные файлы ---
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# --- IDE и редакторы ---
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# --- Конфиги с паролями (на будущее) ---
+.env
+*.secret
+config.local.yaml
+secrets.yaml
+
+# --- Аудио записи (если будут) ---
+recordings/
+*.wav
+*.mp3
+
+# --- Тестовые файлы ---
+test_*.wav
+test_*.mp3
