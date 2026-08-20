@@ -194,7 +194,8 @@ xfconf-query -c xsettings -p /Gtk/FontName -s "Inter 11"
 
 ---
 
-## ЭТАП 5: РАБОТА С NPU VIVANTE VIP9000 (18 августа 2026, день)
+## ЭТАП 5:https://github.com/kalle-smo/orangepi4pro_4gb_ai-project/blob/main/NPU_DRIVER_GUIDE.md
+ РАБОТА С NPU VIVANTE VIP9000 (18 августа 2026, день)
 ### Архитектура NPU Vivante VIP9000
 - **Ядро:** `vipcore` (устройство `/dev/vipcore`, major 199, minor 0, права 666)
 - **Userspace:** `libVIPhal.so`, `libNBGlinker.so`
