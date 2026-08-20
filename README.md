@@ -1,161 +1,120 @@
-#  Orange Pi 4 Pro (4GB) - AI Integration Project
+# 🍊 Orange Pi 4 Pro (4GB) Local AI & NPU Project
 
-> **Status:** Work In Progress (WIP)  
-> **Last Updated:** August 2026
+> **Статус:**  Work In Progress (WIP)  
+> **Платформа:** Orange Pi 4 Pro (Allwinner A733, 4GB RAM)  
+> **ОС:** Armbian 26.11 (Debian Trixie, Kernel 6.6.98)  
+> **Лицензия:** [GPL-2.0](LICENSE)
 
-## 📋 Overview
-
-This repository documents the practical experience of integrating local AI capabilities on **Orange Pi 4 Pro** (Allwinner A733, 4GB LPDDR5 RAM). The project focuses on running lightweight language models locally without cloud dependencies, optimized for the hardware constraints of a budget single-board computer.
-
-**Current Focus:** Setting up Ollama runtime with Qwen 2.5 models and preparing the foundation for a local voice assistant.
+Полный журнал и набор инструментов для превращения Orange Pi 4 Pro в автономный edge-узел для локального искусственного интеллекта. Проект включает в себя разблокировку NPU Vivante VIP9000, оптимизацию системы под 4 ГБ RAM и запуск локальных LLM (Qwen 2.5) через Ollama.
 
 ---
 
-## ✅ What Works (v0.1)
+## 📂 Документация
 
-- [x] **Base System:** Optimized Armbian/Debian setup for Allwinner A733
-- [x] **Storage:** System + 4GB swap migrated to NVMe M.2 SSD (critical for performance)
-- [x] **Ollama Runtime:** Successfully installed and running
-- [x] **LLM Models:** Qwen 2.5 (1.5B / 0.5B) tested and responding
-- [x] **SSH Access:** Headless operation via mobile hotspot + Termux
+Этот репозиторий содержит подробные руководства для каждого этапа проекта:
 
----
+### 📜 Основная документация
 
-## 🛠️ Roadmap
+1. **[master_log.md](master_log.md)** — **Полная 24-часовая хроника проекта**
+   - Диагностика сломанной системы (null bytes, segfault)
+   - Чистая переустановка Armbian
+   - Настройка графической среды XFCE
+   - Работа с NPU Vivante VIP9000
+   - Локальный AI-ассистент
 
-### Phase 1: Core Infrastructure ✅
-- [x] Hardware selection (Orange Pi 4 Pro 4GB)
-- [x] NVMe SSD integration for swap and system
-- [x] Ollama installation
-- [x] Qwen 2.5 model deployment
+2. **[NPU_DRIVER_GUIDE.md](NPU_DRIVER_GUIDE.md)** — **Пошаговая инструкция по NPU**
+   - Извлечение userspace-библиотек из официального образа
+   - Компиляция тестовой утилиты `vpm_run`
+   - Запуск инференса на NPU (ResNet50 за 2.9 мс)
+   - Доступные модели и их производительность
+   - Известные ограничения и решения
 
-### Phase 2: Voice Input (In Progress)
-- [ ] Local speech recognition (Vosk / Whisper.cpp)
-- [ ] USB microphone integration (built-in 3.5mm jack has OMTP/CTIA compatibility issues)
-- [ ] Wake-word detection ("Hey Orange" / custom trigger)
+### 🛠️ Скрипты автоматизации
 
-### Phase 3: System Control Agent (Planned)
-- [ ] Python agent to convert LLM output to safe shell commands
-- [ ] Whitelist-based command execution with confirmation
-- [ ] Hardware button integration (from "Znatok" electronics kit)
-
-### Phase 4: Advanced Features (Future)
-- [ ] Fine-tuning Qwen 2.5 for system administration tasks
-- [ ] RAG (Retrieval-Augmented Generation) for documentation lookup
-- [ ] Multi-modal capabilities (camera integration)
+3. **[setup-ollama.sh](setup-ollama.sh)** — Автоматическая установка Ollama + Qwen 2.5
+4. **[test-qwen.sh](test-qwen.sh)** — Быстрое тестирование модели через API
 
 ---
 
-## 🚀 Quick Start
+##  Быстрый старт
 
-### Prerequisites
-- Orange Pi 4 Pro (4GB RAM recommended)
-- NVMe M.2 SSD (128GB+, e.g., SmartBuy/Netac/Kingston NV2)
-- Armbian or compatible Debian-based OS
-- Stable power supply (5V/3A)
+### Установка Ollama и Qwen 2.5
 
-### Installation
+Если у вас уже установлена чистая Armbian, используйте скрипт автоматической установки:
 
-1. **Clone this repository:**
-git clone https://github.com/kalle-smo/orangepi4pro_4gb_ai-project.git
-cd orangepi4pro_4gb_ai-project
-```
+```bash
+# 1. Скачайте скрипт
+curl -O https://raw.githubusercontent.com/kalle-smo/orangepi4pro_4gb_ai-project/main/setup-ollama.sh
 
-2. **Run the setup script:**
+# 2. Сделайте его исполняемым
 chmod +x setup-ollama.sh
+
+# 3. Запустите установку (потребует sudo)
 sudo ./setup-ollama.sh
 ```
 
-This will:
-- Update system packages
-- Install Ollama
-- Download Qwen 2.5 (1.5B) model
-- Enable Ollama service on boot
-
-3. **Test the model:**
+**После установки:**
+```bash
+# Запуск модели
 ollama run qwen2.5:1.5b
+
+# Или через API
+curl http://localhost:11434/api/generate -d '{
+  "model": "qwen2.5:1.5b",
+  "prompt": "Привет! Как дела?"
+}'
 ```
 
-Or use the quick test script:
-chmod +x test-qwen.sh
-./test-qwen.sh "What command reboots Linux?"
-```
+### Тестирование NPU
+
+Следуйте инструкциям в **[NPU_DRIVER_GUIDE.md](NPU_DRIVER_GUIDE.md)** для:
+- Извлечения библиотек `libVIPhal.so` и `libNBGlinker.so`
+- Компиляции `vpm_run`
+- Первого запуска инференса (~345 FPS)
 
 ---
 
-## ⚙️ Hardware Notes
+## 🔧 Технические детали
 
-### Orange Pi 4 Pro Specifications
+### Железо
 - **SoC:** Allwinner A733 (2× Cortex-A76 + 6× Cortex-A55)
-- **RAM:** 4GB LPDDR5
-- **NPU:** 3 TOPS (not yet utilized in this project)
-- **Storage:** NVMe M.2 M-Key slot (PCIe 3.0)
-- **Audio:** 3.5mm jack (OMTP standard - requires adapter for modern CTIA headsets)
+- **NPU:** Vivante VIP9000 (3 TOPS INT8, CID `0x1000003b`)
+- **RAM:** 4 ГБ LPDDR4
+- **Хранилище:** Рекомендуется NVMe M.2 SSD (не microSD!)
 
-### Critical: NVMe SSD
-The 4GB RAM limitation makes swap essential. Running swap on microSD will:
-- Kill the card within weeks
-- Cause severe performance degradation
-
-**Solution:** Use NVMe SSD for system + swap. Tested models:
-- SmartBuy 128GB NVMe (budget, works fine)
-- Netac 128GB NVMe (similar performance)
-- Kingston NV2 250GB (recommended for reliability)
-
-### Audio Input
-Built-in 3.5mm jack uses outdated **OMTP** standard. Modern headsets use **CTIA**. Options:
-1. Buy OMTP→CTIA adapter (~$2-3)
-2. Use USB microphone (easier, plug-and-play)
-3. Use USB sound card + any microphone
+### Программное обеспечение
+- **ОС:** Armbian 26.11 rolling (Debian Trixie)
+- **Ядро:** 6.6.98-vendor-sun60iw2
+- **NPU драйвер:** VIPLite 2.0.3.2-AW-2024-08-30
+- **LLM:** Ollama 0.32.14 + Qwen 2.5 (0.5B/1.5B)
 
 ---
 
-## 📊 Performance Expectations
+## ⚠️ Важные замечания
 
-With 4GB RAM and Qwen 2.5 (1.5B):
-- **Model size:** ~1GB RAM
-- **Response time:** 5-15 seconds (CPU inference)
-- **Swap usage:** Minimal with swappiness=10
-- **Stable operation:** Yes, with NVMe swap
+1. **Накопитель:** Используйте **NVMe M.2 SSD** вместо microSD. MicroSD быстро деградирует при активном swap.
 
-For better performance, consider:
-- Using `qwen2.5:0.5b` (faster, less capable)
-- Upgrading to 8GB/12GB RAM version of the board
-- Utilizing NPU when drivers mature
+2. **NPU и LLM:** NPU отлично работает с CV-моделями (YOLO, ResNet), но **не подходит** для больших LLM. Для текстовых задач используйте CPU + Ollama.
+
+3. **Аудио:** Встроенный 3.5 мм джек использует стандарт OMTP. Для микрофона используйте USB-микрофон.
 
 ---
 
-## 🔗 Resources & Acknowledgments
+## 📊 Производительность
 
-This project builds upon:
-- [Armbian](https://armbian.com) - Optimized Linux for ARM boards
-- [Ollama](https://ollama.com) - Local LLM runtime
-- [Qwen 2.5](https://github.com/QwenLM) - Alibaba's language models
-- [Orange Pi](http://www.orangepi.org) - Hardware manufacturer
-
----
-
-## 📜 License
-
-This project is licensed under **GNU General Public License v2.0** - see the [LICENSE](LICENSE) file for details.
+| Задача | Модель | Время инференса |
+|--------|--------|-----------------|
+| Классификация | ResNet50 (NPU) | ~5-15 мс |
+| Детекция | YOLOv8n (NPU) | 11.5 мс |
+| LLM | Qwen 2.5 1.5B (CPU) | ~5-10 токенов/сек |
+| Тестовая модель | Simple NBG (NPU) | 2.9 мс (345 FPS) |
 
 ---
 
-## 🤝 Contributing
+## 🤝 Вклад в проект
 
-This is a learning project and work in progress. Issues, suggestions, and pull requests are welcome!
+Pull, сообщения об ошибках и улучшения документации приветствуются! + ☕
 
-**Current focus areas:**
-- Voice recognition integration
-- Safe command execution framework
-- Documentation improvements
-
----
-
-## 📝 Author
-
-**kalle-smo** - Documenting the journey of running local AI on low hardware.
-
----
-
-*Last tested: August 2026 on Orange Pi 4 Pro 4GB with Armbian*
+**Автор:** Kalle  
+**Дата основания:** Август 2026  
+**Лицензия:** [GPL-2.0](LICENSE)
